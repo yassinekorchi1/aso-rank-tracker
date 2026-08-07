@@ -2,8 +2,8 @@ name: Daily ASO Tracker
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Runs automatically every morning at 06:00 UTC
-  workflow_dispatch: # Allows you to run it manually anytime
+    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 jobs:
   track:
@@ -12,12 +12,12 @@ jobs:
       contents: write
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Scraper
         run: npm install
