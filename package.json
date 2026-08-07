@@ -1,7 +1,8 @@
 {
   "name": "aso-tracker",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
-    "google-play-scraper": "^9.0.0"
+    "google-play-scraper": "^10.0.0"
   }
 }
