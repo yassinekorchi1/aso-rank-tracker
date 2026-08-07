@@ -1,0 +1,34 @@
+name: Daily ASO Tracker
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Runs automatically every morning at 06:00 UTC
+  workflow_dispatch: # Allows you to run it manually anytime
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Scraper
+        run: npm install
+
+      - name: Run Tracker Script
+        run: node tracker.js
+
+      - name: Save Results Back To Repo
+        run: |
+          git config --global user.name 'ASO Bot'
+          git config --global user.email 'bot@github.com'
+          git add rank_history.csv
+          git commit -m "Auto-update ranks [skip ci]" || exit 0
+          git push
