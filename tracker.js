@@ -4,12 +4,12 @@ import fs from 'fs';
 // Your App Package Name
 const MY_APP_ID = 'weatherradar.livemaps.free';
 
-// Competitors to track alongside your app
+// Competitors sorted strictly by Package ID (A to Z)
 const COMPETITORS = [
-  'com.acmeaom.android.myradar',
-  'de.wetteronline.wetterapp',
-  'com.wunderground.android.weather',
-  'com.apalon.weatherradar.free'
+  { name: 'MyRadar', id: 'com.acmeaom.android.myradar' },
+  { name: 'Clime (Apalon)', id: 'com.apalon.weatherradar.free' },
+  { name: 'Weather Underground', id: 'com.wunderground.android.weather' },
+  { name: 'WetterOnline', id: 'de.wetteronline.wetterapp' }
 ];
 
 // Keywords you want to track daily
@@ -39,8 +39,8 @@ async function trackRanks() {
 
       const competitorRanks = {};
       COMPETITORS.forEach(comp => {
-        const compIndex = searchResults.findIndex(app => app.appId === comp);
-        competitorRanks[comp] = compIndex !== -1 ? compIndex + 1 : '>100';
+        const compIndex = searchResults.findIndex(app => app.appId === comp.id);
+        competitorRanks[comp.id] = compIndex !== -1 ? compIndex + 1 : '>100';
       });
 
       results.push({ date, keyword, myRank, ...competitorRanks });
@@ -55,11 +55,13 @@ async function trackRanks() {
 
 function saveToCSV(data) {
   const filename = 'rank_history.csv';
-  const headers = 'Date,Keyword,My App Rank,' + COMPETITORS.join(',') + '\n';
+  
+  // Headers show clean display names in Package ID order
+  const headers = 'Date,Keyword,My App Rank,' + COMPETITORS.map(c => `"${c.name}"`).join(',') + '\n';
 
   const rows = data.map(row => {
-    const compValues = COMPETITORS.map(c => row[c]).join(',');
-    return `${row.date},"${row.keyword}",${row.myRank},${compValues}`;
+    const compValues = COMPETITORS.map(c => row[c.id]).join(',');
+    return `"${row.date}","${row.keyword}",${row.myRank},${compValues}`;
   }).join('\n') + '\n';
 
   if (!fs.existsSync(filename)) {
