@@ -6,12 +6,17 @@ const MY_APP_ID = 'weatherradar.livemaps.free';
 
 // Competitors to track alongside your app
 const COMPETITORS = [
-  'com.wunderground.android.weather'
+  'com.acmeaom.android.myradar',
+  'de.wetteronline.wetterapp',
+  'com.wunderground.android.weather',
+  'com.apalon.weatherradar.free'
 ];
 
 // Keywords you want to track daily
 const KEYWORDS = [
-  'weather radar'
+  'weather radar',
+  'tornado',
+  'radar'
 ];
 
 async function trackRanks() {
