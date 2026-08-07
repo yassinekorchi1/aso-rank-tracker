@@ -1,5 +1,5 @@
-const gplay = require('google-play-scraper');
-const fs = require('fs');
+import gplay from 'google-play-scraper';
+import fs from 'fs';
 
 // Your App Package Name
 const MY_APP_ID = 'weatherradar.livemaps.free';
