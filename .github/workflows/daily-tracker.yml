@@ -2,7 +2,8 @@ name: Daily ASO Tracker
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    # Runs daily at 02:25 UTC (optimal post-midnight rollover & avoids top-of-hour queues)
+    - cron: '25 2 * * *'
   workflow_dispatch:
 
 jobs:
