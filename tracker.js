@@ -12,12 +12,37 @@ const COMPETITORS = [
   { name: 'WetterOnline', id: 'de.wetteronline.wetterapp' }
 ];
 
-// Keywords you want to track daily
-const KEYWORDS = [
-  'weather radar',
-  'tornado',
-  'radar'
-];
+// Load keywords dynamically from total-performance-metrics.csv
+function loadKeywords() {
+  const csvFile = 'total-performance-metrics.csv';
+  
+  if (!fs.existsSync(csvFile)) {
+    console.warn(`⚠️ ${csvFile} not found! Falling back to default keywords.`);
+    return ['weather radar', 'tornado', 'radar'];
+  }
+
+  try {
+    const csvContent = fs.readFileSync(csvFile, 'utf-8');
+    const lines = csvContent.split(/\r?\n/);
+
+    const keywords = lines
+      .slice(1) // Skip header row
+      .map(line => {
+        // Extract first column ("Search term")
+        const firstCol = line.split(',')[0];
+        return firstCol ? firstCol.trim().replace(/^"|"$/g, '') : '';
+      })
+      .filter(term => term && term !== 'All search terms' && term !== 'Other');
+
+    console.log(`✅ Loaded ${keywords.length} keywords from ${csvFile}`);
+    return keywords;
+  } catch (error) {
+    console.error(`Error reading ${csvFile}:`, error.message);
+    return ['weather radar', 'tornado', 'radar'];
+  }
+}
+
+const KEYWORDS = loadKeywords();
 
 async function trackRanks() {
   const date = new Date().toISOString().split('T')[0];
