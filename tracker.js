@@ -1,8 +1,10 @@
 import gplay from 'google-play-scraper';
 import fs from 'fs';
 
+// Your App Package Name
 const MY_APP_ID = 'weatherradar.livemaps.free';
 
+// Competitors sorted strictly by Package ID (A to Z)
 const COMPETITORS = [
   { name: 'MyRadar', id: 'com.acmeaom.android.myradar' },
   { name: 'Clime (Apalon)', id: 'com.apalon.weatherradar.free' },
@@ -10,47 +12,20 @@ const COMPETITORS = [
   { name: 'WetterOnline', id: 'de.wetteronline.wetterapp' }
 ];
 
-// Helper delay to avoid GitHub Action runner IP getting rate-limited (HTTP 429)
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-function loadKeywords() {
-  const csvFile = 'total-performance-metrics.csv';
-  
-  if (!fs.existsSync(csvFile)) {
-    console.warn(`⚠️ ${csvFile} not found! Falling back to default keywords.`);
-    return ['weather radar', 'tornado', 'radar'];
-  }
-
-  try {
-    const csvContent = fs.readFileSync(csvFile, 'utf-8');
-    const lines = csvContent.split(/\r?\n/);
-
-    const keywords = lines
-      .slice(1)
-      .map(line => {
-        const firstCol = line.split(',')[0];
-        return firstCol ? firstCol.trim().replace(/^"|"$/g, '') : '';
-      })
-      .filter(term => term && term !== 'All search terms' && term !== 'Other');
-
-    console.log(`✅ Loaded ${keywords.length} keywords from ${csvFile}`);
-    return keywords;
-  } catch (error) {
-    console.error(`Error reading ${csvFile}:`, error.message);
-    return ['weather radar', 'tornado', 'radar'];
-  }
-}
-
-const KEYWORDS = loadKeywords();
+// Keywords you want to track daily
+const KEYWORDS = [
+  'weather radar',
+  'tornado',
+  'radar'
+];
 
 async function trackRanks() {
   const date = new Date().toISOString().split('T')[0];
-  console.log(`Checking ranks for: ${date} (${KEYWORDS.length} terms)`);
+  console.log(`Checking ranks for: ${date}`);
 
   const results = [];
 
-  for (let i = 0; i < KEYWORDS.length; i++) {
-    const keyword = KEYWORDS[i];
+  for (const keyword of KEYWORDS) {
     try {
       const searchResults = await gplay.search({
         term: keyword,
@@ -69,15 +44,9 @@ async function trackRanks() {
       });
 
       results.push({ date, keyword, myRank, ...competitorRanks });
-      console.log(`[${i + 1}/${KEYWORDS.length}] "${keyword}" | Your Rank: #${myRank}`);
-
-      // Pause 1.5 seconds between queries to prevent 429 Rate Limits
-      await sleep(1500);
-
+      console.log(`Keyword: "${keyword}" | Your Rank: #${myRank}`);
     } catch (error) {
       console.error(`Error on keyword "${keyword}":`, error.message);
-      // Extra cooldown on error before continuing
-      await sleep(3000);
     }
   }
 
@@ -86,6 +55,8 @@ async function trackRanks() {
 
 function saveToCSV(data) {
   const filename = 'rank_history.csv';
+  
+  // Headers show clean display names in Package ID order
   const headers = 'Date,Keyword,My App Rank,' + COMPETITORS.map(c => `"${c.name}"`).join(',') + '\n';
 
   const rows = data.map(row => {
